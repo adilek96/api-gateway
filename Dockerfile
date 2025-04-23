@@ -1,11 +1,11 @@
 # Этап сборки
-FROM node:22 AS build
+FROM node:22-alpine as build
 
 WORKDIR /app
 
 # Копируем package.json и устанавливаем зависимости
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm ci
 
 # Копируем исходный код
 COPY . .
@@ -17,34 +17,20 @@ RUN npx prisma generate
 RUN npm run build
 
 # Этап продакшн
-FROM node:22-slim AS production
-
-# Установка необходимых зависимостей для работы Prisma
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+FROM node:22-alpine
 
 WORKDIR /app
 
-# Копируем package.json
-COPY --from=build /app/package*.json ./
-
-# Устанавливаем только production зависимости
-RUN npm ci --only=production --legacy-peer-deps
-
-# Убедимся, что axios установлен
-RUN npm install axios@1.6.2
-
 # Копируем необходимые файлы из этапа сборки
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/package*.json ./
 COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/.env ./.env
 
-# Копируем Prisma Client со всеми скомпилированными движками
-COPY --from=build /app/node_modules/.prisma/client ./node_modules/.prisma/client
-COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
+ENV NODE_ENV=production
 
 # Явно указываем, что используем только порт 4002
-ENV PORT=4000
 EXPOSE 4000
 
 # Запускаем приложение из dist/src/main
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/main.js"]
