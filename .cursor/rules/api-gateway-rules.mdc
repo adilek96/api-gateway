@@ -1,0 +1,17 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+
+
+- Этот проект api-gateway для бакэнда моего сайта социальной сети
+- Стек проекта graphql, prisma
+- Этот проект должен обьеденять три отдельных микросервиса auth-services, post-services, media-upload-services
+- Все микросервисы отдельны и работают самостоятельно
+

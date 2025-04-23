@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Схема будет использоваться только для кеширования и оптимизации работы API Gateway
+// Основные данные хранятся в микросервисах
+
+model ServiceRegistry {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  host      String
+  port      Int
+  status    String // active, inactive
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RequestLog {
+  id           String   @id @default(uuid())
+  serviceName  String
+  endpoint     String
+  requestBody  String? // JSON
+  responseBody String? // JSON
+  statusCode   Int?
+  duration     Int // ms
+  createdAt    DateTime @default(now())
+}
